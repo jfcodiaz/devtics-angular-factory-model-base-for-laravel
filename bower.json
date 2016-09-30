@@ -1,0 +1,17 @@
+{
+  "name": "devtics-angular-factory-model-base",
+  "homepage": "https://github.com/jfcodiaz/devtics-angular-factory-model-base-for-laravel",
+  "authors": [
+    "(J Francisco Díaz <jfcodiaz@gmail.com>)"
+  ],
+  "description": "Facotory que provee de un modelo base para angularjs",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
