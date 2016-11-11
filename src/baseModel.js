@@ -224,8 +224,13 @@
                     this.relations[strRelation].push(entity);
                     this[strRelation + "_ids"].push(entity.id);
                 } else if(fn === "belongsTo") {
-                    this.relations[strRelation] = entity;
-                    this[strRelation +"_id"] = entity.id;
+                    if(entity == null) {
+                        this.relations[strRelation] = null;
+                        this[strRelation +"_id"] = null;
+                    } else {
+                        this.relations[strRelation] = entity;
+                        this[strRelation +"_id"] = entity.id;
+                    }
                 } else {
                     throw Error(strRelation + " Fn no implementada");
                 }
