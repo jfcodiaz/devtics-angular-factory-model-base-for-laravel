@@ -75,7 +75,10 @@
                     'url' : url
                 }).then(function(result) {
                     self.setProperties(result.data);
-                    $defer.reject();
+                    $defer.resolve({
+                        data : result.data,
+                        self : self
+                    });
                 }, function(r) {                
                     $defer.reject(r);
                 });
