@@ -75,6 +75,7 @@
                     'url' : url
                 }).then(function(result) {
                     self.setProperties(result.data);
+                    $defer.reject();
                 }, function(r) {                
                     $defer.reject(r);
                 });
@@ -90,7 +91,7 @@
                 return data;
             },
             create : function () {
-                var  data = this.getProperties();
+          
                 var model = this.model();
                 var self = this;
                 var url = laroute.route(model.aliasUrl());        
@@ -112,7 +113,7 @@
             _preparers : function (data) {
                 var self = this;
                 var atributes = self.model().attributes; 
-                var data = {};
+                var data = this.getProperties();
                 var preparers = self.model().preparers;
                 angular.forEach(atributes, function (attr) {
                     if(preparers && preparers[attr]){
@@ -121,13 +122,6 @@
                     }
                     data[attr] = self[attr];
                 });
-                console.log(data);
-                return data;
-            },
-             update : function () {
-                var self = this;
-                var data = this._preparers();
-                var alias= this.model().alias;
                 var relations = this.model().conf_relations;
                 angular.forEach(relations, function (conf, relation) {
                     if(conf[ModelBase.RELATIONS.FUNCTION] === "hasMany") {
@@ -137,9 +131,16 @@
                         });
                     } else if(conf[ModelBase.RELATIONS.FUNCTION] ==='x') {
 
+                    } else {
+                        console.log("Otra Cosa");
                     }
                 });
-
+                return data;
+            },
+             update : function () {
+                var self = this;
+                var data = this._preparers();
+                var alias= this.model().alias;
                 var datalaroute = {};
                 datalaroute[alias] = this.id;
                 var url = laroute.route(alias+'.update', datalaroute);
@@ -155,23 +156,13 @@
             },
             saveWithFiles : function () {
                 var $def = $q.defer();
-                var self = this;
+//                var self = this;
                 var fd = new FormData();
                 var model = this.model();
                 var data = this.getProperties();
                 var url = laroute.route(model.aliasUrl()); 
                 angular.forEach(this._FILES,function(file, name) { 
                     fd.append(name, file);
-                });
-                var relations = this.model().conf_relations;
-                angular.forEach(relations, function (conf, relation) {
-                    if(conf[ModelBase.RELATIONS.FUNCTION] === "hasMany") {
-                        angular.forEach(self[relation+"_ids"], function(item){
-                            fd.append(relation + "[]", item);
-                        });
-                    } else if(conf[ModelBase.RELATIONS.FUNCTION] ==='x') {
-
-                    }
                 });
                 angular.forEach(data, function (value, field) {
                     if(value!==undefined) {
