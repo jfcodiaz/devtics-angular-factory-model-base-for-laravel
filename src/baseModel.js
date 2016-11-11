@@ -1,6 +1,6 @@
 !function(){
-    var devTics = angular.module('devtics-angular-model-base',[]);
-    devTics.factory('ModelBase', function (Paginacion, $q, $http, $timeout, $interval, $filter) {
+    var devTicsTools = angular.module('devtics-angular-modelbase',[]);
+    devTicsTools.factory('ModelBase', function (Paginacion, $q, $http, $timeout, $interval, $filter) {
         //<editocr-fold defaultstate="collapsed" desc="constructor">
         var ModelBase = function (args) {
 
