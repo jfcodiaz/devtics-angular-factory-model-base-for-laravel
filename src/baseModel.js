@@ -255,7 +255,6 @@
                 return this["_obj_" + key];
             },
             hasMany : function (Model, key, args) {
-                console.log(args);
                 var self = this;
                 var defer = $q.defer();
                 if(self.id){
@@ -288,12 +287,12 @@
                 }
                 return defer.promise;
             },
-            belongsTo : function (Model, key, field) {
+            belongsTo : function (Model, key, field, args) {
                 var self = this;
                 var defer = $q.defer();
                 var id = this[field ? field : key + "_id"];
                 if(id) {
-                    Model.getById(id).then(function(entidad) {                                  
+                    Model.getById(id,args).then(function(entidad) {                                  
                         self.relations[key] = entidad;                         
                         defer.resolve(entidad);
                     }, function(r){
@@ -375,8 +374,8 @@
             if(angular.isString(fn)){//funciones de relaciones por defecto                
                 switch(fn){
                     case 'belongsTo' :
-                        fn = function () {                           
-                            return this.belongsTo(fnModel, key, field);
+                        fn = function (args) {                               
+                            return this.belongsTo(fnModel, key, field, args);
                         };
                         model.attributes.push(field ? field : key + "_id");
                         break;
@@ -517,19 +516,21 @@
         ModelBase.getById = function(id, args) {        
             var data = angular.extend(args || {} , {
                 id : id
-            });        
+            });
             var self = this; 
             var $defer = $q.defer();                
             var objCache = self.model().findCache(data);     
-    //        console.log(objCache);
             if(objCache !== false) {
                 $timeout(function() {
                     $defer.resolve(objCache);
                 }, 10);
             } else {   
                 data = {};
+                if(args) {
+                    data.with = args.with
+                }
                 data[this.aliasUrl()] = id;
-                var url = laroute.route(this.aliasUrl() + '.show', data);            
+                var url = laroute.route(this.aliasUrl() + '.show', data);   
                 $http({
                     'method' : 'GET',
                     'url' : url
