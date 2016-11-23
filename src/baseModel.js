@@ -107,7 +107,7 @@
                 }).then(function(result) {
                     self.setProperties(result.data.model);
                     instancias =model.model().addCache(self);
-                    $defer.resolve(result);
+                    $defer.resolve(result.data);
                 },function(r){
                     $defer.reject(r);
                 });
