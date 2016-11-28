@@ -59,7 +59,9 @@
                 var self = this;
                 $interval(function() {
                     self.refresh().then(function(){
-                        callback.apply(self);
+                        if(callback){
+                            callback.apply(self);
+                        }
                     });
                 },milisecons);            
             },
