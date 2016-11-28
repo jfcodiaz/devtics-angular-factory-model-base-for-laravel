@@ -58,8 +58,8 @@
             selfUpdate : function (milisecons, callback) {  
                 var self = this;
                 $interval(function() {
-                    self.refresh().then(function(){
-                        if(callback){
+                    self.refresh().then(function(){ 
+                        if(callback && callback.apply){
                             callback.apply(self);
                         }
                     });
