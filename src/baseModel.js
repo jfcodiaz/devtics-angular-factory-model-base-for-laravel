@@ -1,7 +1,37 @@
 !function(){
     var devTicsTools = angular.module('devtics-angular-modelbase',[]);
+    
+    devTicsTools.service('SocketIOClientServiceInterce', function() {
+        
+        this.connect = function () {
+            this.socket = io(this.url);
+        };
+        this.on = function(event, callback){
+            console.log("---",event);
+            this.socket.on(event, callback);
+        }
+        
+        this.getSocketIO = function(){
+            return this.socket;
+        };
+        
+        this.getImplement = function () {
+            return this.implement;
+        };
+        
+        this.implementTo = function (obj) {
+            this.implement = obj;
+            angular.forEach(this, function(value, attr) {
+                obj[attr] = value;
+            });
+        }
+        
+    });
+    
+    
+    //<editor-fold defaultstate="collapsed" desc="Factory ModelBase">
     devTicsTools.factory('ModelBase', function (Paginacion, $q, $http, $timeout, $interval, $filter) {
-        //<editocr-fold defaultstate="collapsed" desc="constructor">
+        //<editor-fold defaultstate="collapsed" desc="constructor">
         var ModelBase = function (args) {
 
             this.relations = {};
@@ -55,8 +85,32 @@
                     }
                 });
             },
-            selfUpdate : function (milisecons, callback) {  
+            selfUpdateBySocketIO : function () {
+                var model = this.model();
+                var socket = model.socketIO.SocketIOClientService.getSocketIO();
+                var event = model.socketIO.updateEvent;   
+                var callback = model.socketIO.callback;   
                 var self = this;
+                var eventId = event + "_" + this.id;
+                console.log("---> " + eventId);
+                socket.on(event + "_" + this.id, function(data) {
+                    console.log(eventId, data);
+                    self.setProperties(data);
+                    if(callback) {
+                        callback.apply(this, [data]);
+                    }
+                });
+//                    console.log(, laroute.route(model.aliasUrl()));
+            },
+            selfUpdate : function (milisecons, callback) {  
+                console.log("selfUpdate");
+                
+                var self = this;
+                var model = this.model();
+                if(model.socketIO){
+                    self.selfUpdateBySocketIO();
+                    return;
+                }
                 $interval(function() {
                     self.refresh().then(function(){ 
                         if(callback && callback.apply){
@@ -549,4 +603,6 @@
         //</editor-fold>
         return ModelBase;
     });
+    //</editor-fold>
+    
 }();
