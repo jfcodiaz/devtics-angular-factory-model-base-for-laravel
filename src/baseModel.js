@@ -210,6 +210,8 @@
                     data : data
                 }).then(function(r){
                     $def.resolve(r.data);
+                },function(r){
+                    $def.reject(r);
                 });
                 return $def.promise;
             },
