@@ -217,14 +217,14 @@
             },
             saveWithFiles : function () {
                 var $def = $q.defer();
-//                var self = this;
+                var self = this;
                 var fd = new FormData();
                 var model = this.model();
                 var data = this.getProperties();
                 var url = laroute.route(model.aliasUrl()); 
                 angular.forEach(this._FILES,function(file, name) { 
                     fd.append(name, file);
-                });
+                });                
                 angular.forEach(data, function (value, field) {
                     if(value!==undefined) {
                         if(angular.isArray(value)){
@@ -235,13 +235,26 @@
                             fd.append(field, value);  
                         }
                     }
-                }); 
-                $http.post(url,fd, {
+                });
+                
+                var relations = this.model().conf_relations;
+                angular.forEach(relations, function (conf, relation) {                    
+                    if(conf[ModelBase.RELATIONS.FUNCTION] === "hasMany") {                        
+                        angular.forEach(self[relation + "_ids"], function(item) {                            
+                            fd.append(relation + "[]", item);                            
+                        });
+                    } else if(conf[ModelBase.RELATIONS.FUNCTION] === 'belongsTo') {
+                        fd.append(relation, self[relation + "_id"]);
+                    } else {
+                        console.log("Otra Cosa");
+                    }
+                });
+                $http.post(url, fd, {
                     transformRequest: angular.identity,
                     headers: {'Content-Type': undefined}
-                }).success(function(){
+                }).then(function() {
                     $def.resolve();
-                }).error(function(){
+                }, function() {
                     $def.reject() 
                });
                 return $def.promise;
