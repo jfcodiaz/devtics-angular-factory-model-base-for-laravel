@@ -27,6 +27,58 @@
         }
         
     });
+   devTicsTools.factory('DtDialog', ['$q', '$timeout', '$compile', function($q, $timeout, $compile) {
+        var DtDialog = function ($scope) {
+        };
+        DtDialog.show = function ($scope, $urlTemplate, title, prepare) {
+            var $message = $('<div>Cargando...</div>');
+            var defer = $q.defer();
+            var dialog = BootstrapDialog.show({
+                title: title[0],
+                message: $message,
+                onhide: function(dialog){
+                },
+                onhidden: function(dialog){
+                }
+            });
+            var defPrepare = prepare ? prepare(dialog) : (function(){
+                var d = $q.defer();
+                $timeout(function(){
+                    d.resolve();
+                }, 10);
+                return d.promise;
+            })();
+            var defLoadTemplate = $q.defer();
+            $.get($urlTemplate).done(function(txt){
+                defLoadTemplate.resolve(txt);
+            });
+            $q.all([defPrepare, defLoadTemplate.promise]).then(function(results){
+                var html = results[1];
+                var $divTitle = dialog.getModalHeader().find('.bootstrap-dialog-title');
+                $divTitle.fadeOut("slow");
+                $message.hide("slow", function() {
+                    var $div = $(this);
+                    $div.html(html);                    
+                    $scope.$apply(function(){
+                        dialog.setTitle(title[1]);
+                        $divTitle.show("fast");
+                        $compile(angular.element($div.closest('.modal-content').get(0)).contents())($scope);
+                        defer.resolve(dialog);
+                    });
+                    $div.slideDown("fast");
+                });
+            }, function(fail){
+                console.log(fail);
+            });
+            return defer.promise;
+        };
+        DtDialog.prototype = {
+        };
+        return DtDialog;
+    }]);
+
+    
+    
     
     
     //<editor-fold defaultstate="collapsed" desc="Factory ModelBase">
