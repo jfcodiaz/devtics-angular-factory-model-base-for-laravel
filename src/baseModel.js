@@ -30,7 +30,17 @@
    devTicsTools.factory('DtDialog', ['$q', '$timeout', '$compile', function($q, $timeout, $compile) {
         var DtDialog = function ($scope) {
         };
-        DtDialog.show = function ($scope, $urlTemplate, title, prepare) {
+        DtDialog.btns = {
+            cancel : {
+                label : 'Cancelar',
+                cssClass : 'btn-danger',
+                action : function (dialog) {
+                    dialog.close();
+                }
+            }
+        };
+        DtDialog.show = function ($scope, $urlTemplate, title, prepare, btn) {
+            var _btn = btn ? btn : [];
             var $message = $('<div>Cargando...</div>');
             var defer = $q.defer();
             var dialog = BootstrapDialog.show({
@@ -39,8 +49,11 @@
                 onhide: function(dialog){
                 },
                 onhidden: function(dialog){
-                }
+                },
+                buttons : _btn
             });
+            var $footer = dialog.getModalFooter().hide();
+            var $btns = $footer.find('.bootstrap-dialog-footer').hide();
             var defPrepare = prepare ? prepare(dialog) : (function(){
                 var d = $q.defer();
                 $timeout(function(){
@@ -55,8 +68,8 @@
             $q.all([defPrepare, defLoadTemplate.promise]).then(function(results){
                 var html = results[1];
                 var $divTitle = dialog.getModalHeader().find('.bootstrap-dialog-title');
-                $divTitle.fadeOut("slow");
-                $message.hide("slow", function() {
+                $divTitle.fadeOut(300);
+                $message.hide(300, function() {
                     var $div = $(this);
                     $div.html(html);                    
                     $scope.$apply(function(){
@@ -66,6 +79,10 @@
                         defer.resolve(dialog);
                     });
                     $div.slideDown("fast");
+                    if(_btn.length){
+                        $footer.show();
+                        $btns.show(300);
+                    }
                 });
             }, function(fail){
                 console.log(fail);
