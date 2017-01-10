@@ -440,7 +440,7 @@
                     });
                 } else {
                     $timeout(function() {
-                        defer.reject();
+                        defer.resolve(null);
                     }, 10);
                 }
 
