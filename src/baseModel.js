@@ -71,15 +71,16 @@
                 $divTitle.fadeOut(300);
                 $message.hide(300, function() {
                     var $div = $(this);
-                    $div.html(html);                    
-                    $scope.$apply(function(){
+                    $div.html(html);       
+                    $timeout(function(){
                         dialog.setTitle(title[1]);
                         $divTitle.show("fast");
                         $compile(angular.element($div.closest('.modal-content').get(0)).contents())($scope);
                         defer.resolve(dialog);
-                    });
+                    },1);
+                    
                     $div.slideDown("fast");
-                    if(_btn.length){
+                    if(_btn.length){ 
                         $footer.show();
                         $btns.show(300);
                     }
@@ -89,6 +90,38 @@
             });
             return defer.promise;
         };
+        DtDialog.confirm = function (args) {
+            var $scope = args.$scope;
+            var $template = args.urlTemplate;
+            var title = args.title;
+            var message = args.message;
+            var yes = args.yes;
+            var dialog = BootstrapDialog.confirm({
+                title : title,
+                message : '<div class="dt-messge">Cargando</div>',
+                btnCancelLabel : 'Cancelar',
+                btnOkLabel : 'Aceptar',
+                callback : function (ok){
+                    if(ok){
+                        $timeout(function(){
+                            yes(dialog);
+                        },1);
+                    } else {
+                        dialog.close();
+                    }
+                }
+            });
+            var $divMessage = dialog.getModalContent().find('.dt-messge');
+            $divMessage.hide(200, function(){
+                $divMessage.html(message);
+                $compile(angular.element($divMessage.get(0)).contents())($scope);
+                $divMessage.slideDown(200);
+            });
+            
+            
+        };
+           
+        
         DtDialog.prototype = {
         };
         return DtDialog;
@@ -257,8 +290,10 @@
                         angular.forEach(self[relation + "_ids"], function(item){
                             data[relation].push(item);
                         });
-                    } else if(conf[ModelBase.RELATIONS.FUNCTION] ==='x') {
-
+                    } else if(conf[ModelBase.RELATIONS.FUNCTION] ==='belongsTo') {
+                        if(self[relation + '_id']){
+                            data[relation + '_id'] = self[relation + '_id'];
+                        }
                     } else {
                         console.log("Otra Cosa");
                     }
@@ -391,8 +426,8 @@
                 });
                 return $defer.promise;
             },
-            getter : function (key){
-                return this["_obj_" + key];
+            getRelation : function (relation){
+                return this.relations[relation];
             },
             hasMany : function (Model, key, args) {
                 var self = this;
