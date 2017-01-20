@@ -48,7 +48,6 @@
                 message: $message,               
                 buttons : _btn
             }, args);
-                console.log("conf", conf);
             var dialog = BootstrapDialog.show(conf);
             var $footer = dialog.getModalFooter().hide();
             var $btns = $footer.find('.bootstrap-dialog-footer').hide();
