@@ -120,8 +120,6 @@
             
             
         };
-           
-        
         DtDialog.prototype = {
         };
         return DtDialog;
