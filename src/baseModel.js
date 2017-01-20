@@ -39,26 +39,24 @@
                 }
             }
         };
-        DtDialog.show = function ($scope, $urlTemplate, title, prepare, btn) {
+        DtDialog.show = function ($scope, $urlTemplate, title, prepare, btn, args) {
             var _btn = btn ? btn : [];
             var $message = $('<div>Cargando...</div>');
             var defer = $q.defer();
-            var dialog = BootstrapDialog.show({
+            var conf = $.extend({
                 title: title[0],
-                message: $message,
-                onhide: function(dialog){
-                },
-                onhidden: function(dialog){
-                },
+                message: $message,               
                 buttons : _btn
-            });
+            }, args);
+                console.log("conf", conf);
+            var dialog = BootstrapDialog.show(conf);
             var $footer = dialog.getModalFooter().hide();
             var $btns = $footer.find('.bootstrap-dialog-footer').hide();
             var defPrepare = prepare ? prepare(dialog) : (function(){
                 var d = $q.defer();
                 $timeout(function(){
                     d.resolve();
-                }, 10);
+                }, 10);     
                 return d.promise;
             })();
             var defLoadTemplate = $q.defer();
