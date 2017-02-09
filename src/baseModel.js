@@ -87,6 +87,31 @@
             });
             return defer.promise;
         };
+        DtDialog.alert = function (args) {
+            var $scope = args.$scope;
+//            var $template = args.urlTemplate;
+            var title = args.title;
+            var message = args.txtMessage;
+            var okCallbkack = args.callback;
+            var dialog = BootstrapDialog.alert({
+                title : title,
+                type: BootstrapDialog.TYPE_PRIMARY,
+                message : message,
+                buttonLabel : 'Aceptar',
+                callback : function (result) {
+                    if(okCallbkack) {
+                        return okCallbkack(result, dialog);
+                    }
+                }
+            });
+            $footer = dialog.getModalFooter().find('.btn-default').removeClass('btn-default').addClass('btn-primary');
+//            var $divMessage = dialog.getModalContent().find('.dt-messge');
+//            $divMessage.hide(200, function(){
+//                $divMessage.html(message);
+//                $compile(angular.element($divMessage.get(0)).contents())($scope);
+//                $divMessage.slideDown(200);
+//            });
+        };
         DtDialog.confirm = function (args) {
             var $scope = args.$scope;
             var $template = args.urlTemplate;
@@ -108,6 +133,7 @@
                     }
                 }
             });
+            
             var $divMessage = dialog.getModalContent().find('.dt-messge');
             $divMessage.hide(200, function(){
                 $divMessage.html(message);
