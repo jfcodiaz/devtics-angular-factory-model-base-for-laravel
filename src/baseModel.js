@@ -27,6 +27,22 @@
         }
         
     });
+    
+    devTicsTools.service('dtErrorHelpers', function() {
+        var dtErrorHelpers = {};
+        dtErrorHelpers.goToElementOnReject = function (promise, jqSelector) {
+            promise.catch(function(){
+                setTimeout(function(){
+                    var $box = $(jqSelector);
+                     $('body').scrollTo($box, 500, {  
+                        offset: - $(window).height() /2
+                    });    
+                }, 100);
+            });
+        };
+        return dtErrorHelpers;
+    });
+    
    devTicsTools.factory('DtDialog', ['$q', '$timeout', '$compile', function($q, $timeout, $compile) {
         var DtDialog = function ($scope) {
         };
@@ -142,6 +158,38 @@
             });
             
             
+        };
+        
+        DtDialog.tryDo = function(objPromisse, args) {
+            if(args===undefined){
+                args = {};
+            }
+            objPromisse.then(function(e) {
+                if(args.successConfirm !== false) {
+                    var message;
+                    if(e.data && e.data.message){
+                        message = e.data.message;
+                    } else if(args.succesMessage) {
+                        message = args.succesMessage
+                    } else {
+                        message = "Success";
+                        console.warn("La respuesta no tiene mensaje");
+                    }
+                    $('.notifyjs-corner').appendTo("body");
+                    $.notify(message , "success");
+                }
+            }, function(e){ 
+                if(args.failConfirm !== false) {
+                    switch(args.failConfirmType) {
+                        default :
+                            DtDialog.alert({
+                                title : 'Error',
+                                txtMessage : e.data.message
+                            });
+                    }
+                }
+            });
+            return objPromisse;
         };
         DtDialog.prototype = {
         };
@@ -515,6 +563,12 @@
                 return false;
             }
         };
+        ModelBase.setInt = function (value) {
+            if(value) {
+                return parseInt(value, 10);
+            }
+            return 0;
+        },
         ModelBase.setFloat = function (value) {
             if(value){
                 return parseFloat(value);
