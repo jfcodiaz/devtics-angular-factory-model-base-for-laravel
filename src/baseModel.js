@@ -25,8 +25,48 @@
                 obj[attr] = value;
             });
         }
-        
+         
     });
+    
+    devTicsTools.directive('dtInputMax', function() {
+        return {
+            require: 'ngModel',
+            scope : {
+                dtMax : '=',
+                dtOnGtMax : '='
+            },
+            link : function (scope, element, attrs, ngModelCtrl) {
+                 element.bind("keydown keypress", function (event) {
+                    if(event.which === 46) {                        
+                        event.preventDefault();
+                    }
+                });
+                ngModelCtrl.$parsers.push(function(text) {
+                    if(text) {   
+                        if(!(/^\d+$/.test(text))) {
+                            ngModelCtrl.$setViewValue(text);
+                            ngModelCtrl.$render(); 
+                            return;
+                        }
+                        text = Math.floor(parseInt(text, 10));                        
+                        if(text>scope.dtMax) { 
+                            if(scope.dtOnGtMax) {
+                                scope.dtOnGtMax.apply(this,[text, element]);
+                            }
+                            $(element).notify("Solo se pueden seleccionar ");
+                            return ;
+                        }
+                        return text;
+                    }
+                    ngModelCtrl.$setViewValue("1");
+                    ngModelCtrl.$render(); 
+                    return 1;
+                   
+                });
+            }
+        };
+    });
+    
     
     devTicsTools.service('dtErrorHelpers', function() {
         var dtErrorHelpers = {};
