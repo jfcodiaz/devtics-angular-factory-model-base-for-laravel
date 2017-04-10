@@ -241,7 +241,7 @@
     
     
     //<editor-fold defaultstate="collapsed" desc="Factory ModelBase">
-    devTicsTools.factory('ModelBase', function (Paginacion, $q, $http, $timeout, $interval, $filter) {
+    devTicsTools.factory('ModelBase', function (/*Paginacion,*/ $q, $http, $timeout, $interval, $filter) {
         //<editor-fold defaultstate="collapsed" desc="constructor">
         var ModelBase = function (args) {
 
