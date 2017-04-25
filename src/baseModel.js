@@ -237,7 +237,7 @@
     }]);
 
     //<editor-fold defaultstate="collapsed" desc="Factory ModelBase">
-    devTicsTools.factory('ModelBase', function (/*Paginacion,*/ $q, $http, $timeout, $interval, $filter) {
+    devTicsTools.factory('ModelBase', function (Paginacion, $q, $http, $timeout, $interval, $filter) {
         //<editor-fold defaultstate="collapsed" desc="constructor">
         var ModelBase = function (args) {
 
@@ -657,8 +657,10 @@
         
         ModelBase.addCircularDependency = function(key, fnModel, fn, field){
             var model = this.model();
-            model.relations.push([key, fnModel, fn, field]);
+            var v = [key, fnModel, fn, field];
+            model.relations.push(v);
             model.addRelation(key, fnModel, fn, field);
+            model.conf_relations[key] = v;
         };
         
         ModelBase.addRelation = function (key, fnModel, fn, field) {
@@ -697,7 +699,6 @@
                 model.addRelation(key, fnModel, fn, field);
                 model.conf_relations[key] = v;
             });
-    //        console.log("models->"+model.attributes);
             return model;
         };
         ModelBase.aliasUrl = function () {
@@ -827,7 +828,9 @@
                     'method' : 'GET',
                     'url' : url
                 }).then(function(result) {
+                    console.log('build');
                     var instancias = self.model().build(result.data);
+                    console.log("instancias", instancias);
                     $defer.resolve(instancias);
                 }, function(r) {                
                     $defer.reject(r);
