@@ -236,10 +236,6 @@
         return DtDialog;
     }]);
 
-    
-    
-    
-    
     //<editor-fold defaultstate="collapsed" desc="Factory ModelBase">
     devTicsTools.factory('ModelBase', function (/*Paginacion,*/ $q, $http, $timeout, $interval, $filter) {
         //<editor-fold defaultstate="collapsed" desc="constructor">
@@ -658,7 +654,13 @@
             FUNCTION : 2,
             FIELD: 3
         };
-
+        
+        ModelBase.addCircularDependency = function(key, fnModel, fn, field){
+            var model = this.model();
+            model.relations.push([key, fnModel, fn, field]);
+            model.addRelation(key, fnModel, fn, field);
+        };
+        
         ModelBase.addRelation = function (key, fnModel, fn, field) {
             var model = this.model();        
             if(angular.isString(fn)){//funciones de relaciones por defecto                
