@@ -1,3 +1,4 @@
+/* global BootstrapDialog, laroute */
 !function(){
     var devTicsTools = angular.module('devtics-angular-modelbase',[]);
     
@@ -9,7 +10,7 @@
         this.on = function(event, callback){
             console.log("---",event);
             this.socket.on(event, callback);
-        }
+        };
         
         this.getSocketIO = function(){
             return this.socket;
@@ -24,7 +25,7 @@
             angular.forEach(this, function(value, attr) {
                 obj[attr] = value;
             });
-        }
+        };
          
     });
     
@@ -53,7 +54,7 @@
                             if(scope.dtOnGtMax) {
                                 scope.dtOnGtMax.apply(this,[text, element]);
                             }
-                            $(element).notify("Solo se pueden seleccionar ");
+                            $(element).notify("Solo se pueden seleccionar hasta " + scope.dtMax);
                             return ;
                         }
                         return text;
@@ -210,7 +211,7 @@
                     if(e.data && e.data.message){
                         message = e.data.message;
                     } else if(args.succesMessage) {
-                        message = args.succesMessage
+                        message = args.succesMessage;
                     } else {
                         message = "Success";
                         console.warn("La respuesta no tiene mensaje");
@@ -245,10 +246,54 @@
             this._bk_attrs = {};
             this._FILES = false;
             this.setProperties(args);
+            if(this.id){
+                this.setReadMode();
+            }else {
+                this.setCreateMode();
+            }
         };
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="Metodos de Instancia (prototype)">
         ModelBase.prototype = {
+            setReadMode : function () {
+                this.setMode(this.model().MODE_READ);
+                return this;
+            },
+            setCreateMode : function () {
+                this.setMode(this.model().MODE_CREATE);
+                return this;
+            },
+            setDeleteMode : function () {
+                this.setMode(this.model().MODE_DELETE);
+                return this;
+            },
+            cancelUpdate : function () {
+                this.rollback();
+                this.setReadMode();
+            },
+            setUpdateMode: function() {
+                this._mode = this.model().MODE_UPDATE;
+                this.backup();
+            },
+            inUpdateMode : function () {
+                return this._mode === this.model().MODE_UPDATE;
+            },
+            inReadMode : function () {
+                return this._mode === this.model().MODE_READ;  
+            },
+            inCreateMode : function () {
+                return this._mode === this.model().MODE_CREATE;  
+            },
+            inDeleteMode : function () {
+                return this._mode === this.model().MODE_DELETE;  
+            },
+            getMode : function () {
+                return this._mode;
+            },
+            setMode : function (mode) {
+                this._mode = mode;
+                return this;
+            },
             clearFiles: function() {
                 delete this._FILES;
             },
@@ -356,8 +401,7 @@
                 });
                 return data;
             },
-            create : function () {
-          
+            create : function () {          
                 var model = this.model();
                 var self = this;
                 var url = laroute.route(model.aliasUrl());        
@@ -369,7 +413,8 @@
                     'url' : url
                 }).then(function(result) {
                     self.setProperties(result.data.model);
-                    instancias =model.model().addCache(self);
+                    model.model().addCache(self);
+                    self.setReadMode();
                     $defer.resolve(result.data);
                 },function(r){
                     $defer.reject(r);
@@ -418,7 +463,8 @@
                     method : 'PUT',
                     data : data
                 }).then(function(r){
-                    $def.resolve(r.data);
+                    self.setReadMode();
+                    $def.resolve(r.data);                    
                 },function(r){
                     $def.reject(r);
                 });
@@ -462,9 +508,10 @@
                     transformRequest: angular.identity,
                     headers: {'Content-Type': undefined}
                 }).then(function() {
+                    self.setReadMode();
                     $def.resolve();
                 }, function() {
-                    $def.reject() 
+                    $def.reject();
                });
                 return $def.promise;
             },
@@ -482,11 +529,11 @@
                 var fn = this.model().conf_relations[strRelation][ModelBase.RELATIONS.FUNCTION];
                 if(fn === "hasMany"){
                     var index = this.relations[strRelation].indexOf(entity);
-                    if(index != -1) {
+                    if(index !== -1) {
                         this.relations[strRelation].splice(index,1);
                     }
                     index = this[strRelation + "_ids"].indexOf(entity.id);
-                    if(index !=-1) {
+                    if(index !==-1) {
                         this[strRelation + "_ids"].splice(index,1);
                     }
                 }else {
@@ -497,14 +544,17 @@
             relate : function (strRelation, entity) {
                 var fn = this.model().conf_relations[strRelation][ModelBase.RELATIONS.FUNCTION];
                 if(fn === "hasMany"){
-                    if(this.relations[strRelation]==undefined) {
+                    if(this.relations[strRelation] === undefined) {
                         this.relations[strRelation] = [];
                         this[strRelation + "_ids"] = [];
                     }
-                    this.relations[strRelation].push(entity);
-                    this[strRelation + "_ids"].push(entity.id);
+                    var self = this;                    
+                    angular.forEach(entity, function(e) {
+                        self.relations[strRelation].push(e);
+                        self[strRelation + "_ids"].push(e.id);
+                    });
                 } else if(fn === "belongsTo") {
-                    if(entity == null) {
+                    if(entity === null) {
                         this.relations[strRelation] = null;
                         this[strRelation +"_id"] = null;
                     } else {
@@ -520,12 +570,14 @@
                 var model = this.model();
                 var url = laroute.route(model.aliasUrl())+"/"+this.id;        
                 var $defer = $q.defer();
+                var self = this;
                 $http({
                     'method' : 'DELETE',
                     'url' : url
                 }).then(function(result) {
                     //Todo implemenetar elminar de cache
                     $defer.resolve(result);
+                    self.setDeleteMode();
                 },function(r){
                     $defer.reject(r);
                 });
@@ -543,7 +595,7 @@
                         'relation' :  key
                     };
                     if(args && args.with) {
-                        data.with = args.with
+                        data.with = args.with;
                     }  
                     var url = laroute.route(self.model().aliasUrl()  + '.relation', data);
                     $http({
@@ -648,6 +700,10 @@
         ModelBase.getCache = function () {
             return this.cache;
         };    
+        ModelBase.MODE_CREATE = 1;
+        ModelBase.MODE_READ = 2;
+        ModelBase.MODE_UPDATE = 3;
+        ModelBase.MODE_DELETE = 4;
         ModelBase.RELATIONS = {
             KEY : 0,
             MODEL : 1,
@@ -820,7 +876,7 @@
             } else {   
                 data = {};
                 if(args) {
-                    data.with = args.with
+                    data.with = args.with;
                 }
                 data[this.aliasUrl()] = id;
                 var url = laroute.route(this.aliasUrl() + '.show', data);   
