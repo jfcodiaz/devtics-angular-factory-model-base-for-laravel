@@ -208,8 +208,8 @@
             objPromisse.then(function(e) {
                 if(args.successConfirm !== false) {
                     var message;
-                    if(e.data && e.data.message){
-                        message = e.data.message;
+                    if(e && e.message){
+                        message = e.message;
                     } else if(args.succesMessage) {
                         message = args.succesMessage;
                     } else {
@@ -256,6 +256,7 @@
         //<editor-fold defaultstate="collapsed" desc="Metodos de Instancia (prototype)">
         ModelBase.prototype = {
             setReadMode : function () {
+                this.rollback();
                 this.setMode(this.model().MODE_READ);
                 return this;
             },
@@ -455,7 +456,7 @@
                 var data = this._preparers();
                 var alias= this.model().alias;
                 var datalaroute = {};
-                datalaroute[alias] = this.id;
+                datalaroute[alias.replace(/\-/g,'_')] = this.id;
                 var url = laroute.route(alias+'.update', datalaroute);
                 var $def = $q.defer();
                 $http({
@@ -464,7 +465,7 @@
                     data : data
                 }).then(function(r){
                     self.setReadMode();
-                    $def.resolve(r.data);                    
+                    $def.resolve(r.data);  
                 },function(r){
                     $def.reject(r);
                 });
