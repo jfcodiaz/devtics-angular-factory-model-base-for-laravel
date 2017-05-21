@@ -451,7 +451,7 @@
                 });
                 return data;
             },
-             update : function () {
+            update : function () {
                 var self = this;
                 var data = this._preparers();
                 var alias= this.model().alias;
@@ -495,7 +495,7 @@
                 });
                 
                 var relations = this.model().conf_relations;
-                angular.forEach(relations, function (conf, relation) {                    
+                angular.forEach(relations, function (conf, relation) {
                     if(conf[ModelBase.RELATIONS.FUNCTION] === "hasMany") {                        
                         angular.forEach(self[relation + "_ids"], function(item) {                            
                             fd.append(relation + "[]", item);                            
