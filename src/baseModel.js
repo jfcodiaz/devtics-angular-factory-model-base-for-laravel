@@ -550,7 +550,10 @@
                         this.relations[strRelation] = [];
                         this[strRelation + "_ids"] = [];
                     }
-                    var self = this;                    
+                    var self = this;  
+                    if(!angular.isArray(entity)){
+                        entity = [entity];
+                    }
                     angular.forEach(entity, function(e) {
                         self.relations[strRelation].push(e);
                         self[strRelation + "_ids"].push(e.id);
