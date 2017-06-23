@@ -238,7 +238,7 @@
     }]);
 
     //<editor-fold defaultstate="collapsed" desc="Factory ModelBase">
-    devTicsTools.factory('ModelBase', function (Paginacion, $q, $http, $timeout, $interval, $filter) {
+    devTicsTools.factory('ModelBase', function (/*Paginacion,*/ $q, $http, $timeout, $interval, $filter) {
         //<editor-fold defaultstate="collapsed" desc="constructor">
         var ModelBase = function (args) {
 
@@ -836,7 +836,7 @@
             }).then(function(result) {
                 var arrInst = [], pojsos, paginacion;            
                     pojsos = result.data.data;
-                    paginacion = new Paginacion.build(result.data, self.model());
+                    paginacion = null; //new Paginacion.build(result.data, self.model());
                 $defer.resolve({
                     'instancias': arrInst,
                     'paginacion' : paginacion
