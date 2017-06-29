@@ -238,7 +238,7 @@
     }]);
 
     //<editor-fold defaultstate="collapsed" desc="Factory ModelBase">
-    devTicsTools.factory('ModelBase', function (Paginacion, $q, $http, $timeout, $interval, $filter) {
+    devTicsTools.factory('ModelBase', function ($q, $http, $timeout, $interval, $filter) {
         //<editor-fold defaultstate="collapsed" desc="constructor">
         var ModelBase = function (args) {
 
@@ -502,7 +502,9 @@
                         });
                     } else if(conf[ModelBase.RELATIONS.FUNCTION] === 'belongsTo') {
                         fd.append(relation, self[relation + "_id"]);
-                    } else {
+                    } else if(conf[ModelBase.RELATIONS.FUNCTION] === 'hasOne') {
+//                        fd.append(relation, self[relation + "_id"]);
+                    }else {
                         console.log("Otra Cosa");
                     }
                 });
@@ -550,7 +552,10 @@
                         this.relations[strRelation] = [];
                         this[strRelation + "_ids"] = [];
                     }
-                    var self = this;                    
+                    var self = this;  
+                    if(!angular.isArray(entity)){
+                        entity = [entity];
+                    }
                     angular.forEach(entity, function(e) {
                         self.relations[strRelation].push(e);
                         self[strRelation + "_ids"].push(e.id);
@@ -562,6 +567,12 @@
                     } else {
                         this.relations[strRelation] = entity;
                         this[strRelation +"_id"] = entity.id;
+                    }
+                } else if(fn == 'hasOne'){
+                    if(entity === null){
+                        this.relations[strRelation] = null;
+                    } else {
+                        this.relations[strRelation] = entity;
                     }
                 } else {
                     throw Error(strRelation + " Fn no implementada");
@@ -587,6 +598,34 @@
             },
             getRelation : function (relation){
                 return this.relations[relation];
+            },
+            hasOne : function (Model, key, args) {
+                var self = this;
+                var defer = $q.defer();
+                if(self.id){
+                    var data = {
+                        'id' : self.id,
+                        'relation' :  key
+                    };
+                     if(args && args.with) {
+                        data.with = args.with;
+                    }  
+                    var url = laroute.route(self.model().aliasUrl()  + '.relation', data);
+                    $http({
+                        'method' : 'GET',
+                        'url' : url
+                    }).then(function(result){                
+                        var instancia = Model.build(result.data);
+                        self.relations[key] = instancia;
+//                        self[key+"_ids"] = arrIds;
+                        defer .resolve(instancia);                                
+                    },function(r) {                
+                        defer .reject(r);
+                    });
+                } else {
+                    throw new Error("El modelo no ha sido guardado, no se pueden sersolver relaciones a otros objetos");
+                }
+                return defer.promise;
             },
             hasMany : function (Model, key, args) {
                 var self = this;
@@ -735,6 +774,10 @@
                         fn = function (args) {                              
                             return this.hasMany(fnModel, key, args);
                         };
+                    case  'hasOne' : 
+                        fn = function (args){
+                            return this.hasOne(fnModel, key, args);
+                        };
                     break;
                 }                
             } 
@@ -833,7 +876,7 @@
             }).then(function(result) {
                 var arrInst = [], pojsos, paginacion;            
                     pojsos = result.data.data;
-                    paginacion = new Paginacion.build(result.data, self.model());
+//                    paginacion = new Paginacion.build(result.data, self.model());
                 $defer.resolve({
                     'instancias': arrInst,
                     'paginacion' : paginacion
