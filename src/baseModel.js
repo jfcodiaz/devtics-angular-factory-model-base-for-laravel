@@ -248,10 +248,10 @@
             objPromisse.then(function(e) {
                 if(args.successConfirm !== false) {
                     var message;
-                    if(e && e.message){
-                        message = e.message;
-                    } else if(args.successMessage) {
+                    if(args.successMessage) {
                         message = args.successMessage;
+                    } else if(e && e.message){
+                        message = e.message;
                     } else {
                         message = "Success";
                         console.warn("La respuesta no tiene mensaje");
