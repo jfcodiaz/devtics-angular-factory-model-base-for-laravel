@@ -30,8 +30,8 @@
                 if(event.which === 13) {
                     if (!event.shiftKey) {
                         event.preventDefault();
-                        var ngEnter = $parse(attrs['ngEnter']);    
-                        ngEnter(scope, { $event: event });
+                        var dtEnter = $parse(attrs['dtEnter']);    
+                        dtEnter(scope, { $event: event });
                         scope.$apply();   
                     }  
                 }
