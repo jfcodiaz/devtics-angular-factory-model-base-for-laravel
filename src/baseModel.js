@@ -2,19 +2,21 @@
 !function(){
     var devTicsTools = angular.module('devtics-angular-modelbase',[]);
     
-    //fork http://jsfiddle.net/lsconyer/bktpzgre/1/
-    devTicsTools.directive('ngEnter', function () {
+     devTicsTools.directive('dtEnter', function ($parse) {
         return function (scope, element, attrs) {
             element.bind("keydown keypress", function (event) {
                 if(event.which === 13) {
-                    scope.$apply(function (){
-                        scope.$eval(attrs.ngEnter);
-                    });
-                    event.preventDefault();
+                    if (!event.shiftKey) {
+                        event.preventDefault();
+                        var ngEnter = $parse(attrs['ngEnter']);    
+                        ngEnter(scope, { $event: event });
+                        scope.$apply();   
+                    }  
                 }
             });
         };
     });
+    
     
     devTicsTools.service('SocketIOClientServiceInterce', function() {
         
