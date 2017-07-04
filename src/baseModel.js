@@ -2,7 +2,29 @@
 !function(){
     var devTicsTools = angular.module('devtics-angular-modelbase',[]);
     
-     devTicsTools.directive('dtEnter', function ($parse) {
+    devTicsTools.service('dtQtipError', function (){
+        return function ($element, text, timeout){
+            var _timeout =  timeout? timeout : 2000;
+            var qtip = $element.qtip({
+                position: { my: 'top left', at: 'Bottom center' },
+                style: { classes: 'dt-qtip-error' },
+                content: {
+                     text: text
+                 }
+             }).qtip('api');
+             qtip.toggle(true);                 
+             setTimeout(function() {
+                qtip.elements.tooltip.fadeOut('slow', function(){
+                    qtip.destroy(true); 
+                });
+             }, _timeout);
+             qtip.disable(true);
+        };
+    });
+    
+    
+    
+    devTicsTools.directive('dtEnter', function ($parse) {
         return function (scope, element, attrs) {
             element.bind("keydown keypress", function (event) {
                 if(event.which === 13) {
