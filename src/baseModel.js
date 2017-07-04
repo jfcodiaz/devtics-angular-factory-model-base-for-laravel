@@ -14,9 +14,11 @@
              }).qtip('api');
              qtip.toggle(true);                 
              setTimeout(function() {
-                qtip.elements.tooltip.fadeOut('slow', function(){
-                    qtip.destroy(true); 
-                });
+                if(qtip.elements.tooltip){
+                    qtip.elements.tooltip.fadeOut('slow', function(){
+                        qtip.destroy(true); 
+                    });
+                }                
              }, _timeout);
              qtip.disable(true);
         };
