@@ -14,7 +14,7 @@
              }).qtip('api');
              qtip.toggle(true);                 
              setTimeout(function() {
-                if(qtip.elements.tooltip){
+                if(qtip && qtip.elements && qtip.elements.tooltip){
                     qtip.elements.tooltip.fadeOut('slow', function(){
                         qtip.destroy(true); 
                     });
