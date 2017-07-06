@@ -15,8 +15,8 @@
                 headers: {'Content-Type': undefined}
             }).then(function(result) {
                 $def.resolve(result);
-            }, function() {
-                $def.reject();
+            }, function(result) {
+                $def.reject(result);
             });
             return $def.promise;
         };
