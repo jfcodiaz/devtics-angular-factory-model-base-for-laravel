@@ -2,6 +2,94 @@
 !function(){
     var devTicsTools = angular.module('devtics-angular-modelbase',[]);
     
+    
+    devTicsTools.service('dtUploadFiles', function($http, $q) {
+        return function (url, files) {
+            var $def = $q.defer();
+            var fd = new FormData();
+            angular.forEach(files,function(file, name) { 
+                fd.append(name, file);
+            });                
+            $http.post(url, fd, {
+                transformRequest: angular.identity,
+                headers: {'Content-Type': undefined}
+            }).then(function(result) {
+                $def.resolve(result);
+            }, function() {
+                $def.reject();
+            });
+            return $def.promise;
+        };
+    });
+    devTicsTools.directive("dtFileread", [function () {
+        return {
+            scope: {
+                fileread: "=",
+                onselectfile: "="
+            },
+            link: function (scope, element, attributes) {
+                element.bind("change", function (changeEvent) {
+
+                    if(scope.onselectfile){
+                        scope.onselectfile(changeEvent,event.target.files);
+                    }
+                    if(event.target.files[0]){
+                        scope.fileread = event.target.files[0];
+                    }
+                });
+            }
+        };
+    }]);
+
+    devTicsTools.directive('dtFilesDragAndDrop',[
+        function (){
+            return {
+                scope : {
+                    fileread: "=",
+                    onselectfile: "=",
+                    multiple: "="
+                },
+                link : function(scope, element, attributes){  
+                    var inputFile = angular.element(
+                        '<input type="file" ' +
+                            (attributes.multiple !== undefined ? 'multiple' : '') +
+                            (attributes.accept !== undefined ? ' accept="' + attributes.accept + '"' : 'accept=".jpg,.png"') +
+                        ' style="display:none">'
+                    );
+                    element.append(inputFile);
+                    inputFile.bind('click', function(e) {
+                         e.stopPropagation();
+                    });
+
+                    inputFile.bind('change', function(e) {
+                        var self = this;
+                        scope.$apply(function() {
+                            scope.onselectfile(self.files);
+                        });
+                        e.stopPropagation();
+                    });
+
+                    element.bind('click', function ($event) {
+                        $(inputFile).click();
+                        $event.preventDefault();
+                    });
+
+                    element.bind('drop',function($event) {
+                        scope.$apply(function() {
+                            scope.onselectfile($event.originalEvent.dataTransfer.files);
+                        });
+                        $event.preventDefault();
+                    });
+
+                    element.bind('dragover', function ($event) {
+                        $event.preventDefault();
+                    });
+                }
+            };
+        }
+    ]);
+    
+    
     devTicsTools.service('dtQtipError', function (){
         return function ($element, text, timeout){
             var _timeout =  timeout? timeout : 2000;
