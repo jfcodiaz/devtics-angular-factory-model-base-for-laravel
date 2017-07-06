@@ -345,7 +345,12 @@
                         console.warn("La respuesta no tiene mensaje");
                     }
                     $('.notifyjs-corner').appendTo("body");
-                    $.notify(message , "success");
+                    var _options = args.notifyOptions ? args.notifyOptions : undefined; 
+                    if(args.notifyElement) {
+                        $(args.notifyElement).notify(message , "success", _options);
+                    }else {
+                        $.notify(message , "success", _options);
+                    }
                 }
             }, function(e){ 
                 if(args.failConfirm !== false) {
