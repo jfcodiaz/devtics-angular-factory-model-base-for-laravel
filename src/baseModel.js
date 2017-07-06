@@ -338,8 +338,8 @@
                     var message;
                     if(args.successMessage) {
                         message = args.successMessage;
-                    } else if(e && e.message){
-                        message = e.message;
+                    } else if(e && e.data.message){
+                        message = e.data.message;
                     } else {
                         message = "Success";
                         console.warn("La respuesta no tiene mensaje");
