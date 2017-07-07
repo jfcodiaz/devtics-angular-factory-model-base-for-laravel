@@ -673,7 +673,9 @@
                     if(index !==-1) {
                         this[strRelation + "_ids"].splice(index,1);
                     }
-                }else {
+                } else if(fn === 'hasOne') {
+                    var index = this.relations[strRelation] = undefined; 
+                } else {
                     throw Error(strRelation + " Fn no implementada");
                 }
                 return this;
