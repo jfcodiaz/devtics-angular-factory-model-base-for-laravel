@@ -1099,7 +1099,6 @@
                     'url' : url
                 }).then(function(result) {
                     var instancias = self.model().build(result.data);
-                    console.log("instancias", instancias);
                     $defer.resolve(instancias);
                 }, function(r) {                
                     $defer.reject(r);
