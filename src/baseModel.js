@@ -1098,7 +1098,6 @@
                     'method' : 'GET',
                     'url' : url
                 }).then(function(result) {
-                    console.log('build');
                     var instancias = self.model().build(result.data);
                     console.log("instancias", instancias);
                     $defer.resolve(instancias);
