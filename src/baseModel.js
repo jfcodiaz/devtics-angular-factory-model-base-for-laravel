@@ -2,6 +2,40 @@
 !function(){
     var devTicsTools = angular.module('devtics-angular-modelbase',[]);
     
+     devTicsTools.service('dtGeoTools', ['$q', '$window', function ($q, $window) {
+        'use strict';
+        this.getCurrentPosition = function () {
+            var deferred = $q.defer();
+            if (!$window.navigator.geolocation) {
+                deferred.reject('Geolocation not supported.');
+            } else {
+                $window.navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        deferred.resolve(position);
+                    },
+                    function (err) {
+                        deferred.reject(err);
+                    });
+            }
+            return deferred.promise;
+        };
+        this.getCurrentPositionGoogleMapLatLng = function () { 
+            var deferred = $q.defer();
+            this.getCurrentPosition().then(function (position) {
+                    var gLatlng = new google.maps.LatLng({
+                        lat : position.coords.latitude, 
+                        lng : position.coords.longitude
+                    });
+                    deferred.resolve(gLatlng);
+                },
+                function (err) {
+                            console.log("No se pudo");
+                    deferred.reject(err);
+                }
+            );
+            return deferred.promise;
+        };
+    }]);
     
     devTicsTools.service('dtUploadFiles', function($http, $q) {
         return function (url, files) {
