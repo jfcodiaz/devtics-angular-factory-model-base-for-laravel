@@ -2,7 +2,27 @@
 !function(){
     var devTicsTools = angular.module('devtics-angular-modelbase',[]);
     
-     devTicsTools.service('dtGeoTools', ['$q', '$window', function ($q, $window) {
+    devTicsTools.directive('dtOnlyNumbers', function () {
+        return {
+            require: 'ngModel',
+            link: function (scope, element, attr, ngModelCtrl) {
+                function fromUser(text) {
+                    if (text) {
+                        var transformedInput = text.replace(/[^0-9]/g, '');
+                        if (transformedInput !== text) {
+                            ngModelCtrl.$setViewValue(transformedInput);
+                            ngModelCtrl.$render();
+                        }
+                        return transformedInput;
+                    }
+                    return undefined;
+                }            
+                ngModelCtrl.$parsers.push(fromUser);
+            }
+        };
+    });
+    
+    devTicsTools.service('dtGeoTools', ['$q', '$window', function ($q, $window) {
         'use strict';
         this.getCurrentPosition = function () {
             var deferred = $q.defer();
