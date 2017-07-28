@@ -416,6 +416,7 @@
                             });
                     }
                 }
+                return e;
             });
             return objPromisse;
         };
@@ -505,6 +506,58 @@
                     self[attr] = self._bk_attrs[attr];
                 });
                 return this;
+            },
+            _httpRequest: function (nameMethod, args) {
+                var _args = {};
+                var alias = args.alias;
+                var urlParams = args.urlParams ? args.urlParams : {};
+                var params = args.params ? args.params : {};
+                var success = args.success;
+                var fail = args.fail;
+                var $defer = $q.defer();
+                var self = this;
+                var build = !(args.build === false);
+                var sendId = !(args.sendId === false);
+                
+                if(sendId) {
+                    urlParams[this.model().alias] = this.id;
+                }
+                
+                var url = laroute.route(alias, urlParams);                
+                
+                if(build && !success) {
+                    success = function (result) {
+                        $defer.resolve(self.mode().build(result));
+                    };
+                }
+                
+                if(!success) {
+                    success = function (result) {
+                        $defer.resolve(result);
+                    };
+                }
+                
+                if(!fail) {
+                    fail = function (result) {
+                        $defer.reject(result);
+                    };
+                }
+                
+                $http[nameMethod](url, params).then(success, fail);                                
+                
+                return $defer.promise;
+            },
+            httpPut: function (args) {
+                return this._httpRequest('put', args);
+            },
+            httpPost :function (args) {
+                return this._httpRequest('post', args);
+            },
+            httpDelete :function (args) {
+                return this._httpRequest('delete', args);
+            },
+            httpGet :function (args) {
+                return this._httpRequest('get', args);
             },
             //<editor-fold defaultstate="collapsed" desc="setProperties">
             setProperties: function (data) {            
