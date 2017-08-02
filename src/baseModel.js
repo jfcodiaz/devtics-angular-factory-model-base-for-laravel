@@ -517,6 +517,7 @@
                 var $defer = $q.defer();
                 var self = this;
                 var build = !(args.build === false);
+                var updateProps = !(args.updateProps === false);
                 var sendId = !(args.sendId === false);
                 
                 if(sendId) {
@@ -527,7 +528,10 @@
                 
                 if(build && !success) {
                     success = function (result) {
-                        $defer.resolve(self.mode().build(result));
+                        if(result.data.model && updateProps){
+                            self.setProperties(result.data.model);
+                        }
+                        $defer.resolve(result);
                     };
                 }
                 
@@ -565,11 +569,13 @@
                 var atributes = self.model().attributes; 
                 var setters = self.model().setters;
                 angular.forEach(atributes, function (attr) {
-                    if(setters && setters[attr]){
-                        self[attr] = setters[attr].apply(self,[data[attr]]);
-                        return;
+                    if(data[attr] !== undefined) {
+                        if(setters && setters[attr]) {
+                            self[attr] = setters[attr].apply(self,[data[attr]]);
+                            return;
+                        }
+                        self[attr] = data[attr];                    
                     }
-                    self[attr] = data[attr];
                 });
                 angular.forEach(self.model().relations,function(r){
                     if(data[r[0]]) {
