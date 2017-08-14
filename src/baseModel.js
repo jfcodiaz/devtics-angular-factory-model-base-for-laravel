@@ -507,7 +507,7 @@
                 });
                 return this;
             },
-            _httpRequest: function (nameMethod, args) {
+            _httpRequest: function (nameMethod, args)  {
                 var _args = {};
                 var alias = args.alias;
                 var urlParams = args.urlParams ? args.urlParams : {};
@@ -519,36 +519,38 @@
                 var build = !(args.build === false);
                 var updateProps = !(args.updateProps === false);
                 var sendId = !(args.sendId === false);
-                
-                if(sendId) {
+
+                if (sendId) {
                     urlParams[this.model().alias] = this.id;
                 }
-                
-                var url = laroute.route(alias, urlParams);                
-                
-                if(build && !success) {
+
+                var url = laroute.route(alias, urlParams);
+
+                if (build && !success) {
                     success = function (result) {
-                        if(result.data.model && updateProps){
+                        if (result.data.collection) {
+                            result = self.model().build(result.data.collection);
+                        } else if (result.data.model && updateProps) {
                             self.setProperties(result.data.model);
                         }
                         $defer.resolve(result);
                     };
                 }
-                
-                if(!success) {
+
+                if (!success) {
                     success = function (result) {
                         $defer.resolve(result);
                     };
                 }
-                
-                if(!fail) {
+
+                if (!fail) {
                     fail = function (result) {
                         $defer.reject(result);
                     };
                 }
-                
-                $http[nameMethod](url, params).then(success, fail);                                
-                
+
+                $http[nameMethod](url, params).then(success, fail);
+
                 return $defer.promise;
             },
             httpPut: function (args) {
