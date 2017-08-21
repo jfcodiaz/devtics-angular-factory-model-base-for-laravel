@@ -686,8 +686,9 @@
                 angular.forEach(relations, function (conf, relation) {
                     if(conf[ModelBase.RELATIONS.FUNCTION] === "hasMany") {
                         data[relation] = [];
-                        angular.forEach(self[relation + "_ids"], function(item){
-                            data[relation].push(item);
+                        angular.forEach(self.relations[relation], function(item){
+                            console.log("has Many", item);
+                            data[relation].push(item.id ? item.id : item._preparers());
                         });
                     } else if(conf[ModelBase.RELATIONS.FUNCTION] ==='belongsTo') {
                         if(self[relation + '_id']){
@@ -745,8 +746,16 @@
                 var relations = this.model().conf_relations;
                 angular.forEach(relations, function (conf, relation) {
                     if(conf[ModelBase.RELATIONS.FUNCTION] === "hasMany") {                        
-                        angular.forEach(self[relation + "_ids"], function(item) {                            
-                            fd.append(relation + "[]", item);                            
+                        angular.forEach(self.relations[relation], function(item, i) {
+                            if(item.id) {
+                               fd.append(relation + "[]", item.id);  
+                            } else {
+                               angular.forEach(item._preparers(), function(value, key) {
+                                    if(value !== undefined) {
+                                        fd.append(relation + "[" + i + "][" + key + "]", value);   
+                                    }
+                               });
+                            }                    
                         });
                     } else if(conf[ModelBase.RELATIONS.FUNCTION] === 'belongsTo') {
                         fd.append(relation, self[relation + "_id"]);
