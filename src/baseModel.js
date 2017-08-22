@@ -768,13 +768,16 @@
                 $http.post(url, fd, {
                     transformRequest: angular.identity,
                     headers: {'Content-Type': undefined}
-                }).then(function() {
+                }).then(function(result) {
+                    self.setProperties(result.data.model);
+                    model.model().addCache(self);
                     self.setReadMode();
-                    $def.resolve();
+                    $def.resolve(result.data);
                 }, function() {
                     $def.reject();
                });
-                return $def.promise;
+               
+               return $def.promise;
             },
             save : function () {
                 if(this._FILES) {
